@@ -6,7 +6,7 @@ from crud import crud
 router = APIRouter()
 
 
-@router.get("/issues", response_model=List[IssueSchema], status_code=200)
+@router.get("/show-issues", response_model=List[IssueSchema], status_code=200)
 def get_issues(issues_id: int | None = None):
     if issues_id is None:
         return crud.read_issues()
