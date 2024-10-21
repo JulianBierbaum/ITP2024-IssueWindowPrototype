@@ -10,6 +10,8 @@ Base = declarative_base()
 
 
 class IssueDB(Base):
+    __tablename__ = "issues"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     issue_type = Column(String(50), nullable=False)
     title = Column(String(50), nullable=False)
@@ -17,4 +19,4 @@ class IssueDB(Base):
     task_point = Column(Integer, nullable=True)
 
 
-Base.metadate.create_all(engine)
+Base.metadata.create_all(engine)
