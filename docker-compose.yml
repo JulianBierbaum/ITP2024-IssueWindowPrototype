@@ -21,6 +21,14 @@ services:
       - POSTGRES_USER=prototype_dev
       - POSTGRES_PASSWORD=prototype_dev
       - POSTGRES_DB=prototype_dev
+  frontend:
+    build:
+      context: ./issue-prototype
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./issue-prototype:/app
+      - /app/node_modules
 
 volumes:
   postgres_data:
