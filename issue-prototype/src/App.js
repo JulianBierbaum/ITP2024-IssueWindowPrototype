@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -6,6 +6,8 @@ function App() {
   const [showButtons, setShowButtons] = useState(false);
   const [showBugMask, setShowBugMask] = useState(false);
   const [showTaskMask, setShowTaskMask] = useState(false);
+  const [issues, setIssues] = useState([]); // State to store issues
+  const [loading, setLoading] = useState(true); // State to manage loading status
 
   const handleInitClick = () => {
     setShowButtons(true);
@@ -24,18 +26,59 @@ function App() {
   };
 
   const handleBugSubmitClick = async () => {
+    const bugTitle = document.getElementById('bugTitle').value;
+    const bugReportTime = document.getElementById('bugReportTime').value;
+
+    try {
+      const response = await axios.post('http://localhost:8000/issues', {
+        title: bugTitle,
+        report_time: bugReportTime,
+        issue_type: 'Bug',
+      });
+      console.log('Bug submitted:', response.data);
+      fetchIssues(); // Refresh the issues after submitting
+    } catch (error) {
+      console.error('Error submitting bug:', error);
+    }
+
     setShowBugMask(false);
-    const bugTitle = document.getElementById('bugTitle');
-    const bugReportTime = document.getElementById('bugReportTime');
-    // const response = await axios.post('http://127.0.0.1:8000/issues/');
   };
 
   const handleTaskSubmitClick = async () => {
+    const taskTitle = document.getElementById('taskTitle').value;
+    const taskPoints = parseInt(document.getElementById('taskPoints').value, 10);
+
+    try {
+      const response = await axios.post('http://localhost:8000/issues', {
+        Task: {issue_type: 'Task', title: taskTitle, report_time: '', task_point: taskPoints}
+      });
+      console.log('Task submitted:', response.data);
+      fetchIssues(); // Refresh the issues after submitting
+    } catch (error) {
+      console.error('Error submitting task:', error);
+    }
+
     setShowTaskMask(false);
-    const taskTitle = document.getElementById('taskTitle');
-    const taskPoints = parseInt(document.getElementById('taskPoints'));
-    // const response = await axios.post('http://127.0.0.1:8000/issues/');
   };
+
+  // Fetch issues from the server
+  const fetchIssues = async () => {
+    setLoading(true);
+    try {
+        const response = await axios.get('http://localhost:8000/show-issues');
+        setIssues(response.data); // Assuming the data is in response.data
+        console.log(response);
+    } catch (error) {
+        console.error('Error fetching issues:', error);
+    }
+    setLoading(false);
+};
+
+
+  // Fetch issues when the component mounts
+  useEffect(() => {
+    fetchIssues();
+  }, []);
 
   return (
     <div className="App">
@@ -43,7 +86,7 @@ function App() {
         <button onClick={handleInitClick}>+</button>
 
         {showButtons && (
-          <div className='issue-selecter'>
+          <div className='issue-selector'>
             <button onClick={handleBugClick}>Add new Bug</button>
             <button onClick={handleTaskClick}>Add new Task</button>
           </div>
@@ -51,21 +94,36 @@ function App() {
 
         {showBugMask && (
           <div className='bug-mask'>
-            <input type="text" placeholder="Title" id="bugTitle"></input><br></br>
-            <input type="text" placeholder="Report Time" id="bugReportTime"></input><br></br>
-
+            <input type="text" placeholder="Title" id="bugTitle" /><br />
+            <input type="text" placeholder="Report Time" id="bugReportTime" /><br />
             <button onClick={handleBugSubmitClick} type='submit'>Submit</button>
           </div>
         )}
 
         {showTaskMask && (
-          <div className='bug-mask'>
-            <input type="text" placeholder="Title" id="taskTitle"></input><br></br>
-            <input type="text" placeholder="Task Points" id="taskPoints"></input><br></br>
-
+          <div className='task-mask'>
+            <input type="text" placeholder="Title" id="taskTitle" /><br />
+            <input type="text" placeholder="Task Points" id="taskPoints" /><br />
             <button onClick={handleTaskSubmitClick} type='submit'>Submit</button>
           </div>
         )}
+
+        {/* Display the list of issues */}
+        <div className="issues-list">
+          {loading ? (
+            <p>Loading issues...</p>
+          ) : (
+            <ul>
+              {issues.map((issue, index) => (
+                <li key={index}>
+                  <strong>{issue.title}</strong> - {issue.issue_type} 
+                  {issue.report_time && ` (Report Time: ${issue.report_time})`}
+                  {issue.task_point !== undefined && ` (Task Points: ${issue.task_point})`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </header>
     </div>
   );
