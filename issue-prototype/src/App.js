@@ -3,34 +3,38 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-  const [showButtons, setShowButtons] = useState(false);
-  const [showBugMask, setShowBugMask] = useState(false);
-  const [showTaskMask, setShowTaskMask] = useState(false);
+  const [showButtons, setShowButtons] = useState(false); // State to show issue type buttons
+  const [showBugMask, setShowBugMask] = useState(false); // State to show Bug Mask
+  const [showTaskMask, setShowTaskMask] = useState(false); // State to show Task Mask
   const [issues, setIssues] = useState([]); // State to store issues
   const [loading, setLoading] = useState(true); // State to manage loading status
 
+  // Shows issue selection Buttons
   const handleInitClick = () => {
     setShowButtons(true);
     setShowBugMask(false);
     setShowTaskMask(false);
   };
 
+  // Shows Bug Mask
   const handleBugClick = () => {
     setShowBugMask(true);
     setShowButtons(false);
   };
 
+  // Show Task Mask
   const handleTaskClick = () => {
     setShowTaskMask(true);
     setShowButtons(false);
   };
 
+  // Handle Submit Click for Bugs
   const handleBugSubmitClick = async () => {
     const bugTitle = document.getElementById('bugTitle').value;
     const bugReportTime = document.getElementById('bugReportTime').value;
 
     try {
-      const response = await axios.post('http://localhost:8000/issues', {
+      const response = await axios.post('http://localhost:8002/issues', {
         title: bugTitle,
         report_time: bugReportTime,
         issue_type: 'Bug',
@@ -44,12 +48,13 @@ function App() {
     setShowBugMask(false);
   };
 
+  // Handle Submit Click for Tasks
   const handleTaskSubmitClick = async () => {
     const taskTitle = document.getElementById('taskTitle').value;
     const taskPoints = parseInt(document.getElementById('taskPoints').value, 10);
 
     try {
-      const response = await axios.post('http://localhost:8000/issues', {
+      const response = await axios.post('http://localhost:8002/issues', {
         Task: {issue_type: 'Task', title: taskTitle, report_time: '', task_point: taskPoints}
       });
       console.log('Task submitted:', response.data);
@@ -65,15 +70,14 @@ function App() {
   const fetchIssues = async () => {
     setLoading(true);
     try {
-        const response = await axios.get('http://localhost:8000/show-issues');
+        const response = await axios.get('http://localhost:8002/show-issues');
         setIssues(response.data); // Assuming the data is in response.data
         console.log(response);
     } catch (error) {
         console.error('Error fetching issues:', error);
     }
     setLoading(false);
-};
-
+  };
 
   // Fetch issues when the component mounts
   useEffect(() => {
@@ -108,7 +112,6 @@ function App() {
           </div>
         )}
 
-        {/* Display the list of issues */}
         <div className="issues-list">
           {loading ? (
             <p>Loading issues...</p>
